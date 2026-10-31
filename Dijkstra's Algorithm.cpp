@@ -7,6 +7,7 @@ const ll INF = 1e18;
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
+    
     int n, m;
     cin >> n >> m;
 
@@ -26,20 +27,30 @@ int main() {
 
     int source;
     cin >> source;
-
+    
+    //           0   1   2   3   4   5
+    // dist = { INF,INF,INF,INF,INF,INF}
+    // n+base = 5+1 = 6
     vector<ll> dist(n + base, INF);
 
     // Min-Heap: {distance, node}
+    // ll= distance from source 
+    // int = node number 
     priority_queue<
         pair<ll, int>,
         vector<pair<ll, int>>,
         greater<pair<ll, int>>
     > pq;
 
+
+    //dist = { INF,0,INF,INF,INF,INF }
+    //pq = {0,1}
     dist[source] = 0;
     pq.push({0, source});
 
     while (!pq.empty()) {
+        //  pq={0,1} ;d = 0
+        // node = 1
         ll d = pq.top().first;
         int node = pq.top().second;
         pq.pop();
