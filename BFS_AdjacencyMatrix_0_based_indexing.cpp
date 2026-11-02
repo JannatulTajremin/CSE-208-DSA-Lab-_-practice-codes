@@ -40,6 +40,8 @@ int main(){
     // q =[0]
     cout<< node<<" ";
     //neighbour checking 
+    //adj[node][i]==1 (i is the neighbour of node)
+    //!visited[i] (i is never visited before)
     for(int i=0;i<n;i++){
         if(adj[node][i]==1 && !visited[i]){
             visited[i] = true ;
