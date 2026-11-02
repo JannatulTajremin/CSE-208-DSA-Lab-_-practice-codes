@@ -1,103 +1,92 @@
-#include <bits/stdc++.h>
+// This code is for 0 based indexing
+// Nodes = 0, 1, 2, 3...
+
+#include<bits/stdc++.h>
 using namespace std;
 
-struct Edge {
-    int u, v, w;
-};
-
-// এজ-এর ওজন অনুযায়ী ছোট থেকে বড় সাজানোর জন্য কম্প্যারেটর
-bool cmp(Edge a, Edge b) {
-    return a.w < b.w;
-}
-
-int main() {
-    // ইনপুট-আউটপুট ফাস্ট করার জন্য অপ্টিমাইজেশন
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    //n=nodes , m=edges
+int main()
+{
     int n, m;
     cin >> n >> m;
 
-    // Corner Case: if node(n)=1 ,edge will be 0
-    if (n == 1) {
-        cout << "Edges in MST:\nTotal MST Cost = 0\n";
-        return 0;
+    // Edge store করার জন্য 3টি vector
+    vector<int>u(m), v(m), w(m);
+
+    // Parent array
+    int parent[100];
+
+    int total = 0;
+
+
+    // Initially every node is its own parent
+    for(int i = 0; i < n; i++)
+    {
+        parent[i] = i;
     }
 
-    vector<Edge> edges(m);
-    set<int> unique_nodes; 
 
-    for (int i = 0; i < m; i++) {
-        cin >> edges[i].u >> edges[i].v >> edges[i].w;
-        unique_nodes.insert(edges[i].u);
-        unique_nodes.insert(edges[i].v);
+    // Edge input
+    for(int i = 0; i < m; i++)
+    {
+        cin >> u[i] >> v[i] >> w[i];
     }
 
-    // ওজনের ক্রমানুসারে এজগুলো সর্ট করা
-    sort(edges.begin(), edges.end(), cmp);
 
-    // যেকোনো এলোমেলো বা বড় আইডি হ্যান্ডেল করার জন্য ম্যাপ
-    map<int, int> parent;
-    
-    // শুধু ইনপুটে থাকা নোডগুলোর প্যারেন্ট ইনিশিয়ালাইজ করা
-    for (int node : unique_nodes) {
-        parent[node] = node;
-    }
-
-    long long totalCost = 0;
-    int edgeCount = 0;
-
-    cout << "Edges in MST:\n";
-
-    for (int i = 0; i < m; i++) {
-        int u = edges[i].u;
-        int v = edges[i].v;
-        int w = edges[i].w;
-
-        // --- Find Parent (Map ভিত্তিক Path Compression) ---
-        int root_u = u;
-        while (root_u != parent[root_u]) {
-            root_u = parent[root_u];
-        }
-        int curr_u = u;
-        while (curr_u != root_u) {
-            int nxt = parent[curr_u];
-            parent[curr_u] = root_u;
-            curr_u = nxt;
-        }
-
-        int root_v = v;
-        while (root_v != parent[root_v]) {
-            root_v = parent[root_v];
-        }
-        int curr_v = v;
-        while (curr_v != root_v) {
-            int nxt = parent[curr_v];
-            parent[curr_v] = root_v;
-            curr_v = nxt;
-        }
-        // ------------------------------------------------
-
-        // সাইকেল তৈরি না করলে MST তে যোগ করা হবে
-        if (root_u != root_v) {
-            cout << u << " - " << v << " : " << w << "\n";
-
-            totalCost += w;
-            edgeCount++;
-
-            parent[root_u] = root_v; // Union Operation
-
-            if (edgeCount == n - 1)
-                break;
+    // Sort edges by weight (ascending order)
+    for(int i = 0; i < m - 1; i++)
+    {
+        for(int j = i + 1; j < m; j++)
+        {
+            if(w[i] > w[j])
+            {
+                swap(w[i], w[j]);
+                swap(u[i], u[j]);
+                swap(v[i], v[j]);
+            }
         }
     }
 
-    if (edgeCount == n - 1) {
-        cout << "Total MST Cost = " << totalCost << "\n";
-    } else {
-        cout << "MST is not possible. Graph is disconnected.\n";
+
+    cout << "Selected edges:\n";
+
+
+    // Check every sorted edge
+    for(int i = 0; i < m; i++)
+    {
+        int a = u[i];
+        int b = v[i];
+
+
+        // Find parent of u[i]
+        while(parent[a] != a)
+        {
+            a = parent[a];
+        }
+
+
+        // Find parent of v[i]
+        while(parent[b] != b)
+        {
+            b = parent[b];
+        }
+
+
+        // If parents are different, no cycle will form
+        if(a != b)
+        {
+            cout << u[i] << " - " << v[i]
+                 << " : " << w[i] << endl;
+
+            total += w[i];
+
+
+            // Union operation
+            parent[a] = b;
+        }
     }
+
+
+    cout << "Minimum cost = " << total << endl;
 
     return 0;
 }
