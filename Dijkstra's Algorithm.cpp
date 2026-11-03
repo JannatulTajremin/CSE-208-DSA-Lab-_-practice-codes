@@ -1,84 +1,75 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
 const ll INF = 1e18;
 
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
+int main(){
     int n, m;
     cin >> n >> m;
-
-    int base;
-    cin >> base; // Starting index: 0, 1, 2, etc.
-
-    // Adjacency List: {neighbor, weight}
-    vector<vector<pair<int, int>>> adj(n + base);
-
-    for (int i = 0; i < m; i++) {
+    
+    // হুবহু BFS-এর মতো n*n এর Adjacency Matrix (টেবিল) তৈরি
+    // কানেকশন না থাকলে ০-এর বদলে INF দিয়ে ফিল করা হয়েছে
+    vector<vector<ll>> adj(n, vector<ll>(n, INF)); 
+    
+    for(int i = 0; i < m; i++){
         int u, v, w;
-        cin >> u >> v >> w;
-
-        adj[u].push_back({v, w});
-        adj[v].push_back({u, w}); // Undirected graph
+        cin >> u >> v >> w; // নোডের সাথে weight (w) ইনপুট
+        
+        adj[u][v] = w; // u থেকে v এর কানেকশন খরচ 
+        adj[v][u] = w; // v থেকে u এর কানেকশন খরচ (Undirected graph)
     }
 
-    int source;
-    cin >> source;
-    
-    //           0   1   2   3   4   5
-    // dist = { INF,INF,INF,INF,INF,INF}
-    // n+base = 5+1 = 6
-    vector<ll> dist(n + base, INF);
+    // source node বা শুরুর নোড
+    int start;
+    cin >> start;
 
-    // Min-Heap: {distance, node}
-    // ll= distance from source 
-    // int = node number 
-    priority_queue<
-        pair<ll, int>,
-        vector<pair<ll, int>>,
-        greater<pair<ll, int>>
-    > pq;
+    // BFS-এ ছিল: vector<bool> visited (n, false);
+    // Dijkstra-তে: Distance array (শুরুতে সব INF)
+    vector<ll> dist(n, INF);
 
+    // BFS-এ ছিল: queue<int> q;
+    // Dijkstra-তে: Min-Heap priority queue {distance, node}
+    priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> q;
 
-    //dist = { INF,0,INF,INF,INF,INF }
-    //pq = {0,1}
-    dist[source] = 0;
-    pq.push({0, source});
+    // BFS-এ ছিল: visited[start] = true; q.push(start);
+    // Dijkstra-তে: শুরুর নোডের দূরত্ব ০ এবং সেটা কিউতে পুশ
+    dist[start] = 0;
+    q.push({0, start});
 
-    while (!pq.empty()) {
-        //  pq={0,1} ;d = 0
-        // node = 1
-        ll d = pq.top().first;
-        int node = pq.top().second;
-        pq.pop();
+    while (!q.empty()){
+        // BFS-এর মতোই ফ্রন্ট এলিমেন্ট বের করা
+        ll d = q.top().first;
+        int node = q.top().second;
+        q.pop();
 
-        // Ignore outdated entries
-        if (d != dist[node])
-            continue;
+        // অপ্রয়োজনীয় বা পুরোনো ভ্যালু স্কিপ করা
+        if (d > dist[node]) continue;
 
-        for (auto edge : adj[node]) {
-            int neighbor = edge.first;
-            int weight = edge.second;
-
-            if (dist[node] + weight < dist[neighbor]) {
-                dist[neighbor] = dist[node] + weight;
-                pq.push({dist[neighbor], neighbor});
+        // Neighbour checking (হুবহু তোমার BFS কোডের মতো ০ থেকে n পর্যন্ত লুপ)
+        for(int i = 0; i < n; i++){
+            
+            // BFS-এ কন্ডিশন ছিল: if(adj[node][i]==1 && !visited[i])
+            // Dijkstra-তে কন্ডিশন: কানেকশন আছে কিনা এবং দূরত্ব কমানো সম্ভব কিনা
+            if(adj[node][i] != INF && dist[node] + adj[node][i] < dist[i]){
+                
+                // BFS-এ ছিল: visited[i] = true;
+                // Dijkstra-তে: দূরত্ব আপডেট করা
+                dist[i] = dist[node] + adj[node][i];
+                
+                // BFS-এ ছিল: q.push(i);
+                // Dijkstra-তে: নতুন দূরত্বসহ কিউতে পুশ
+                q.push({dist[i], i});
             }
         }
     }
 
-    cout << "Shortest distances from source " << source << ":\n";
-
-    for (int i = base; i < n + base; i++) {
+    // আউটপুট প্রিন্ট (০ থেকে n-1 পর্যন্ত)
+    cout << "Shortest distances from start node " << start << ":\n";
+    for (int i = 0; i < n; i++) {
         cout << "Node " << i << " : ";
-
-        if (dist[i] == INF)
-            cout << "INF\n";
-        else
-            cout << dist[i] << '\n';
+        if (dist[i] == INF) cout << "INF\n";
+        else cout << dist[i] << '\n';
     }
 
     return 0;
